@@ -105,6 +105,7 @@ SECTIONS {
         _data = .;
         KEEP(*(.data*))
         . = ALIGN(4); /* Make sure we're word-aligned at the end of flash */
+        _edata = .;
     } > SRAM
 
     /* Global Offset Table */
@@ -146,7 +147,7 @@ SECTIONS {
      * through off our calculations of the header.
      */
     PROVIDE_HIDDEN (__exidx_start = .);
-    .ARM.exidx :
+    .ARM.exidx : AT (_edata)
     {
       /* (C++) Index entries for section unwinding */
       *(.ARM.exidx* .gnu.linkonce.armexidx.*)
