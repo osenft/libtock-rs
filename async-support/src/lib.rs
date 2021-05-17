@@ -1,32 +1,11 @@
+#![feature(gen_future)]
 #![feature(generator_trait)]
 #![no_std]
 
 pub use core::*;
 
-pub mod future {
-    pub use core::future::Future;
-    use core::ops::Generator;
-    use core::pin::Pin;
-    use core::task::Poll;
-
-    pub fn poll_with_tls_context<F>(f: Pin<&mut F>) -> Poll<F::Output>
-    where
-        F: Future,
-    {
-        crate::executor::poll(f)
-    }
-
-    pub fn from_generator<G: Generator<Yield = ()>>(
-        generator: G,
-    ) -> impl Future<Output = G::Return> {
-        crate::executor::from_generator(generator)
-    }
-}
-
 pub mod executor {
     use core::future::Future;
-    use core::ops::Generator;
-    use core::ops::GeneratorState;
     use core::pin::Pin;
     use core::ptr;
     use core::task::Context;
@@ -79,31 +58,5 @@ pub mod executor {
 
         // The wakers don't have any implementation, so the instance can simply be null.
         RawWaker::new(ptr::null(), &DUMMY_WAKER_VTABLE)
-    }
-
-    pub(crate) fn from_generator<G: Generator<Yield = ()>>(
-        generator: G,
-    ) -> impl Future<Output = G::Return> {
-        GeneratorFuture { generator }
-    }
-
-    struct GeneratorFuture<G> {
-        generator: G,
-    }
-
-    impl<G: Generator<Yield = ()>> Future for GeneratorFuture<G> {
-        type Output = G::Return;
-
-        fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
-            // Pin::map_unchecked_mut is safe as long as the move and drop guarantees are propagated through the mapping.
-            // This is trivially satisfied since our future is only a newtype decorator of the generator.
-            let pinned_generator =
-                unsafe { self.map_unchecked_mut(|future| &mut future.generator) };
-
-            match pinned_generator.resume() {
-                GeneratorState::Yielded(()) => Poll::Pending,
-                GeneratorState::Complete(out) => Poll::Ready(out),
-            }
-        }
     }
 }
