@@ -3,8 +3,8 @@
     alloc_error_handler,
     core_intrinsics,
     lang_items,
+    llvm_asm,
     naked_functions,
-    ptr_offset_from
 )]
 #![cfg_attr(any(target_arch = "arm", target_arch = "riscv32"), no_std)]
 

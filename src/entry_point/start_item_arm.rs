@@ -7,12 +7,12 @@ use core::intrinsics;
 #[naked]
 #[link_section = ".start"]
 pub unsafe extern "C" fn _start(
-    app_start: usize,
-    mem_start: usize,
+    _app_start: usize,
+    _mem_start: usize,
     _memory_len: usize,
-    app_heap_break: usize,
+    _app_heap_break: usize,
 ) -> ! {
-    asm!("
+    llvm_asm!("
         // Because ROPI-RWPI support in LLVM/rustc is incomplete, Rust
         // applications must be statically linked. An offset between the
         // location the program is linked at and its actual location in flash
@@ -104,7 +104,7 @@ pub unsafe extern "C" fn _start(
         // Call rust_start
         bl rust_start"
         :                                                              // No output operands
-        : "{r0}"(app_start), "{r1}"(mem_start), "{r3}"(app_heap_break) // Input operands
+        : /*"{r0}"(app_start), "{r1}"(mem_start), "{r3}"(app_heap_break)*/ // Input operands
         : "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r12",
           "cc", "memory"                                               // Clobbers
         : "volatile"                                                   // Options

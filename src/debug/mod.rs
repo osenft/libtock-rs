@@ -19,7 +19,7 @@ pub fn print_as_hex(value: usize) {
 #[cfg(target_arch = "arm")]
 pub fn print_stack_pointer() {
     let stack_pointer;
-    unsafe { asm!("mov $0, sp" : "=r"(stack_pointer) : : : "volatile") };
+    unsafe { llvm_asm!("mov $0, sp" : "=r"(stack_pointer) : : : "volatile") };
 
     let mut buffer = [b'\n'; 15];
     buffer[0..4].clone_from_slice(b"SP: ");
