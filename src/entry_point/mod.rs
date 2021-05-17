@@ -150,7 +150,18 @@ use linked_list_allocator::Heap;
 #[global_allocator]
 static ALLOCATOR: TockAllocator = TockAllocator;
 
-static mut HEAP: Heap = Heap::empty();
+static mut HEAP: Heap = Heap // = Heap::empty();
+{
+	bottom: 0,
+	size: 0,
+	used: 0,
+	holes: linked_list_allocator::hole::HoleList {
+		first: linked_list_allocator::hole::Hole {
+			size: 0,
+			next: None,
+		},
+	},
+};
 
 struct TockAllocator;
 
